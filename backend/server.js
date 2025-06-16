@@ -1,8 +1,20 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+require('dotenv').config();
+const User = require('./models/User'); 
 
-const users = [];
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  console.log("✅ Connected to MongoDB Atlas");
+})
+.catch((err) => {
+  console.error("❌ Error connecting to MongoDB:", err.message);
+});
 
 app.use(express.json());
 
@@ -12,9 +24,7 @@ app.get('/', (req, res) => {
 
 app.post('/login', async (req, res) => {
 
-  const userExisting = users.find(user => 
-    user.username === req.body.username 
-  );
+  const userExisting = await User.findOne({username:req.body.username});
 
   if (userExisting) {
     const passwordValid = await bcrypt.compare(req.body.password,userExisting.password)
@@ -31,18 +41,17 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-  const userExists = users.find(user =>
-    user.username === req.body.username
-  );
+  const userExists = await User.findOne({username:req.body.username});
 
   if (userExists) {
     res.send("Username already exists ❌");
   } else {
     const hashedPassword = await bcrypt.hash(req.body.password,10);
-    users.push({
+    NewUser = new User({
       username: req.body.username,
       password: hashedPassword
     });
+    await NewUser.save();
     res.send("Signup successful ✅");
   }
 });
