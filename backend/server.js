@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-require('dotenv').config();
 const User = require('./models/User'); 
+require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -16,6 +17,7 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error("❌ Error connecting to MongoDB:", err.message);
 });
 
+app.use(cors()); 
 app.use(express.json());
 
 app.get('/', (req, res) => {
