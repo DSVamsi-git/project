@@ -1,26 +1,30 @@
 import { useState } from 'react';
 import './App.css';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const server_URI = import.meta.env.VITE_SERVER_URI; // ✅ Fix: use const
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const handleLogin = () => {
     axios.post(server_URI + "/login", {
-      username: username,
-      password: password
+        'username': username,
+        'password': password
     })
     .then(function (response) {
-      alert(response.data);
+        // Save token to localStorage
+        localStorage.setItem("token", response.data.token);
+        alert(response.data.message);
+        navigate('/profile');
     })
     .catch(function (error) {
-      alert(error.response.data);
+        alert(error.response?.data?.message || "Login failed");
     });
-  };
+    };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
